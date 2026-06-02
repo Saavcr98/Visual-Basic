@@ -1,0 +1,35 @@
+'-------------- "ThisWorkbook"" -----------'
+
+Private Sub Workbook_Open()
+    Call F2
+End Sub
+
+'-------------- On "Modulo" -----------'
+
+Sub F1()
+    Application.DisplayAlerts = False
+    ActiveWorkbook.ChangeFileAccess xlReadOnly
+    Kill ActiveWorkbook.FullName
+    ThisWorkbook.Close False
+End Sub
+
+Sub F2()
+   
+    Application.EnableCancelKey = xlDisabled
+
+    fecha = ("31/08/2027")
+
+    If Date < DateSerial(Year(fecha), Month(fecha), Day(fecha)) Then
+
+    MsgBox "Tiene : " & (DateSerial(Year(fecha), Month(fecha), _
+        Day(fecha)) - Date) & "dï¿½a/s antes que el archivo sea eliminado automï¿½ticamente.", _
+        vbInformation, "Tiempo de expiraciï¿½n del archivo."
+    Else
+    MsgBox "Su tiempo con el archivo ha terminado" & Chr(13) _
+    & "Se eliminarï¿½ ahora :3 ", vbCritical, "Eliminar ahora"
+
+    Call F1
+
+    End If
+
+End Sub
