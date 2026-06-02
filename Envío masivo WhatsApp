@@ -1,0 +1,60 @@
+Sub EnvioBASE()
+    Dim nombre As String
+    Dim telefono As String
+    Dim auto As String
+    Dim mensaje As String
+    Dim url As String
+    Dim i As Long
+
+    ' Comienza en la segunda fila (asumiendo encabezados en la primera fila)
+    i = 2
+    While ThisWorkbook.Sheets("Base para envíar").Cells(i, 1).Value <> ""
+        ' Leer los datos de cada fila
+        nombre = ThisWorkbook.Sheets("Base para envíar").Cells(i, 1).Value
+        telefono = ThisWorkbook.Sheets("Base para envíar").Cells(i, 2).Value
+        auto = ThisWorkbook.Sheets("Base para envíar").Cells(i, 3).Value
+        mensaje = ThisWorkbook.Sheets("Base para envíar").Cells(i, 4).Value
+       
+        ' Personalizar el mensaje
+        mensaje = Replace(mensaje, "{nombre}", nombre)
+        mensaje = Replace(mensaje, "{auto}", auto)
+
+        ' Crear la URL de WhatsApp Web
+        url = "https://wa.me/" & telefono & "?text=" & Application.WorksheetFunction.EncodeURL(mensaje)
+
+        ' Abrir la URL en Google Chrome
+        Dim chromePath As String
+        chromePath = """C:\Program Files\Google\Chrome\Application\chrome.exe"""
+        Shell (chromePath & " --new-window " & url), vbNormalFocus
+
+        ' Esperar para que la página cargue completamente
+        Application.Wait Now + TimeValue("00:00:5") ' 5 segundos de espera (ajustar si es necesario)
+
+           ' Simular pulsar "Enter" para enviar el mensaje
+        SendKeys "~"
+        Application.Wait Now + TimeValue("00:00:02") ' Espera 3 segundos
+
+        SendKeys "^v"
+        Application.Wait Now + TimeValue("00:00:02") ' Espera 3 segundos
+
+        SendKeys "~"
+        Application.Wait Now + TimeValue("00:00:02") ' Espera 3 segundos
+
+
+
+        ' Pasar al siguiente contacto
+        i = i + 1
+    Wend
+
+    MsgBox "Todos los mensajes han sido enviados.", vbInformation
+
+'-------------------------------
+#  Ejemplo de las columns necesarias para realizar el envío 
+  A        B        C       D
+Nombre	Teléfono	Auto	Mensaje
+Cris	555-123-456	GMC	{nombre}, tu {auto}
+....
+...
+..
+.
+'------------------------------
