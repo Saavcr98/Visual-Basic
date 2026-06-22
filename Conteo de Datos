@@ -1,0 +1,53 @@
+Sub ConteodeDatosporcolumnas()
+'
+' Macro1 Macro
+'
+
+'
+
+
+    Dim ws As Worksheet
+    Dim hojaResumen As Worksheet
+    Dim fila As Long
+    Dim conteo As Long
+    Dim nombreHoja As String
+    Dim resultados() As Variant
+    Dim i As Long
+
+    ' Crear o limpiar hoja "Resumen"
+    On Error Resume Next
+    Set hojaResumen = ActiveWorkbook.Sheets("Resumen")
+    If hojaResumen Is Nothing Then
+        Set hojaResumen = ActiveWorkbook.Sheets.Add
+        hojaResumen.Name = "Resumen"
+    Else
+        hojaResumen.Cells.Clear
+    End If
+    On Error GoTo 0
+
+    ' Preparar encabezados
+    hojaResumen.Range("A1:B1").Value = Array("Hoja", "Registros")
+
+    ' Recolectar conteos
+    ReDim resultados(1 To ActiveWorkbook.Sheets.Count, 1 To 2)
+    i = 1
+
+    For Each ws In ActiveWorkbook.Sheets
+        If ws.Name <> hojaResumen.Name Then
+            nombreHoja = ws.Name
+            conteo = Application.WorksheetFunction.CountA(ws.Columns("D")) - 1 ' Resta encabezado si existe
+            resultados(i, 1) = nombreHoja
+            resultados(i, 2) = conteo
+            i = i + 1
+        End If
+    Next ws
+
+    ' Volcar resultados en hoja resumen
+    hojaResumen.Range("A2").Resize(i - 1, 2).Value = resultados
+
+    ' Ordenar por número de registros (columna B)
+    hojaResumen.Range("A1:B" & i - 1).Sort Key1:=hojaResumen.Range("B2"), Order1:=xlDescending, Header:=xlYes
+
+    MsgBox "Conteo completado y ordenado en hoja 'Resumen'.", vbInformation
+
+End Sub
