@@ -1,0 +1,63 @@
+Sub EliminarFilasBasura()
+    Dim ws As Worksheet
+    Dim ur As Range
+    Dim data As Variant
+    Dim r As Long, c As Long
+    Dim topRow As Long
+    Dim lastRow As Long
+    Dim palabras As Variant
+    Dim filasBorrar() As Long
+    Dim borrarCount As Long
+    Dim texto As String
+    Dim i As Long, k As Long
+    
+    ' Nombre de la hoja
+    Set ws = ActiveWorkbook.Worksheets("Datos")
+    
+    'Palabras a borrar (en minúsculas)
+    palabras = Array("test")
+    ' Rango usado
+    Set ur = ws.UsedRange
+    If ur Is Nothing Then Exit Sub
+    
+    data = ur.Value
+    topRow = ur.Row
+    
+    For r = 1 To UBound(data, 1)
+        Dim eliminar As Boolean
+        eliminar = False
+        
+        For c = 1 To UBound(data, 2)
+            texto = LCase$(Trim(CStr(data(r, c))))
+            texto = Replace(texto, Chr(160), " ") ' Quita espacios no separables
+            
+            For k = LBound(palabras) To UBound(palabras)
+                If InStr(1, texto, palabras(k), vbTextCompare) > 0 Then
+                    eliminar = True
+                    Exit For
+                End If
+            Next k
+            
+            If eliminar Then Exit For
+        Next c
+        
+        If eliminar Then
+            borrarCount = borrarCount + 1
+            ReDim Preserve filasBorrar(1 To borrarCount)
+            filasBorrar(borrarCount) = topRow + r - 1
+        End If
+    Next r
+    
+    If borrarCount > 0 Then
+        Application.ScreenUpdating = False
+        Application.Calculation = xlCalculationManual
+        For i = borrarCount To 1 Step -1
+            ws.Rows(filasBorrar(i)).Delete
+        Next i
+        Application.Calculation = xlCalculationAutomatic
+        Application.ScreenUpdating = True
+    End If
+    
+    MsgBox "Filas eliminadas: " & borrarCount, vbInformation
+End Sub
+
