@@ -1,0 +1,47 @@
+Sub Eliminardatosdespuesdeunavariable()
+'
+' Macro1 Macro
+'
+
+
+    Dim ws As Worksheet
+    Dim celda As Range
+    Dim separador As String
+    Dim filaSeparador As Long
+    Dim ultimaFila As Long
+
+    separador = "-----x-----"
+
+    Application.ScreenUpdating = False
+
+    For Each ws In ThisWorkbook.Worksheets
+        With ws
+            ultimaFila = .Cells(.Rows.Count, "A").End(xlUp).Row
+            filaSeparador = 0
+
+            For Each celda In .Range("A1:A" & ultimaFila)
+                If IsError(celda.Value) Then GoTo SiguienteCelda
+                If CleanText(CStr(celda.Value)) = separador Then
+                    filaSeparador = celda.Row
+                    Exit For
+                End If
+SiguienteCelda:
+            Next celda
+
+            If filaSeparador > 0 Then
+                .Rows(filaSeparador & ":" & .Rows.Count).Delete
+            End If
+        End With
+    Next ws
+
+    Application.ScreenUpdating = True
+
+    MsgBox "Se eliminaron los datos desde el separador en todas las hojas.", vbInformation
+
+End Sub
+
+' Función para limpiar caracteres invisibles y espacios
+Function CleanText(texto As String) As String
+    On Error Resume Next
+    CleanText = Replace(Replace(Replace(Trim(texto), vbCr, ""), vbLf, ""), Chr(160), "")
+End Function
