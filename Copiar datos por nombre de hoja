@@ -1,0 +1,55 @@
+Sub CopiarDatosPorNombreDeHoja()
+
+   Dim libroOrigen As Workbook
+    Dim libroDestino As Workbook
+    Dim hojaOrigen As Worksheet
+    Dim hojaDestino As Worksheet
+    Dim rutaLibroOrigen As String
+    Dim nombreHoja As String
+    Dim filaDestino As Long
+    Dim rangoOrigen As Range
+
+    ' --- Seleccionar archivo origen ---
+    With Application.FileDialog(msoFileDialogFilePicker)
+        .Title = "Selecciona el archivo origen"
+        .Filters.Clear
+        .Filters.Add "Archivos de Excel", "*.xls*"
+        If .Show <> -1 Then Exit Sub
+        rutaLibroOrigen = .SelectedItems(1)
+    End With
+
+    Set libroOrigen = Workbooks.Open(rutaLibroOrigen)
+    Set libroDestino = ThisWorkbook ' El libro donde está la macro
+
+    Application.ScreenUpdating = False
+
+    For Each hojaOrigen In libroOrigen.Worksheets
+        nombreHoja = hojaOrigen.Name
+
+        On Error Resume Next
+        Set hojaDestino = libroDestino.Worksheets(nombreHoja)
+        On Error GoTo 0
+
+        If Not hojaDestino Is Nothing Then
+            filaDestino = hojaDestino.Cells(hojaDestino.Rows.Count, "A").End(xlUp).Row + 1
+            
+            If hojaDestino.Cells(1, 1).Value = "" Then filaDestino = 1
+
+            Set rangoOrigen = hojaOrigen.UsedRange
+            
+            rangoOrigen.Copy Destination:=hojaDestino.Cells(filaDestino, 1)
+        Else
+            MsgBox "No se encontró la hoja '" & nombreHoja & "' en el libro destino.", vbExclamation
+        End If
+
+        Set hojaDestino = Nothing
+        Set rangoOrigen = Nothing
+    Next hojaOrigen
+
+    libroOrigen.Close SaveChanges:=False
+
+    Application.ScreenUpdating = True
+
+    MsgBox "¡Datos copiados debajo de los existentes correctamente!", vbInformation
+
+End Sub
